@@ -22,11 +22,22 @@ const BUST_SCENARIOS = [
   { message: "just busted !!", gif: './KINGDOM KAM.gif' }
 ];
 const KINGDOM_GIF = './KINGDOM KAM.gif';
+const RANDOM_CHANNEL = "1440258431226478693";
+const RANDOM_MESSAGES = [
+  "Get a load of this guy 🥀",
+  "Sybau twin 💔",
+  "Get a job 🥀",
+  "👉 ⏱️",
+  "yea no shit 🥀"
+];
 
 /* --- EXPRESS KEEP-ALIVE --- */
 const app = express();
 app.get('/', (_, res) => res.send("OK"));
 app.listen(process.env.PORT || 3000, () => console.log("Keep-alive server running"));
+
+/* --- AFK USERS MAP --- */
+const afkUsers = new Map();
 
 /* --- WELCOME EVENT --- */
 client.on("guildMemberAdd", async (member) => {
@@ -52,14 +63,36 @@ client.on("guildMemberAdd", async (member) => {
 /* --- MESSAGE COMMAND HANDLER --- */
 client.on("messageCreate", async (message) => {
   if (message.author.bot) return;
+
   const del = () => message.delete().catch(() => {});
 
-  /* .ping */
+  // --- AFK SYSTEM ---
+  if (message.content.startsWith(".afk")) {
+    const reason = message.content.slice(4).trim();
+    if (!reason) return message.reply("Please provide a reason for AFK.");
+    
+    afkUsers.set(message.author.id, reason);
+    return message.reply(`You are now AFK: "${reason}" 🥀`);
+  }
+
+  // Remove AFK if user sends any message
+  if (afkUsers.has(message.author.id)) {
+    afkUsers.delete(message.author.id);
+    message.channel.send(`${message.author.username} is back from AFK! 🥀`);
+  }
+
+  // Check mentions
+  message.mentions.users.forEach(user => {
+    if (afkUsers.has(user.id)) {
+      message.channel.send(`<@${user.id}> ${afkUsers.get(user.id)} 🥀`);
+    }
+  });
+
+  /* --- COMMANDS --- */
   if (message.content === ".ping") {
     return message.channel.send("Pong! 🏓");
   }
 
-  /* .bust */
   if (message.content === ".bust") {
     try {
       const onlineMembers = message.guild.members.cache.filter(m => {
@@ -93,7 +126,6 @@ client.on("messageCreate", async (message) => {
     }
   }
 
-  /* .kingdom or .kam */
   if ([".kingdom", ".kam"].includes(message.content)) {
     try {
       if (fs.existsSync(KINGDOM_GIF)) {
@@ -112,13 +144,11 @@ client.on("messageCreate", async (message) => {
     }
   }
 
-  /* .mem */
   if (message.content === ".mem") {
     await message.channel.send(`Total members: ${message.guild.memberCount}`);
     return del();
   }
 
-  /* .pfp */
   if (message.content.startsWith(".pfp")) {
     const user = message.mentions.users.first() || message.author;
     await message.channel.send({
@@ -127,7 +157,6 @@ client.on("messageCreate", async (message) => {
     return del();
   }
 
-  /* .hotauntiesnearme */
   if (message.content.startsWith(".hotauntiesnearme")) {
     const hotNumbers = ["03075386948","03410014849","03000540786","03117078408","03098129729"];
     const hotMessages = [
@@ -143,7 +172,6 @@ client.on("messageCreate", async (message) => {
     return del();
   }
 
-  /* .testwelcome */
   if (message.content === ".testwelcome") {
     if (fs.existsSync(WELCOME_GIF)) {
       await message.channel.send({
@@ -162,40 +190,7 @@ client.on("messageCreate", async (message) => {
 client.once("ready", () => {
   console.log(`Logged in as ${client.user.tag}`);
 
-  /* --- RANDOM MESSAGES EVERY 3 HOURS --- */
-  const RANDOM_CHANNEL = "1440258431226478693";
-  const RANDOM_MESSAGES = [
-    "Get a load of this guy 🥀",
-    "Sybau twin 💔",
-    "Get a job 🥀",
-    "👉 ⏱️",
-    "yea no shit 🥀"
-  ];
-  
-  // --- AFK SYSTEM ---
-const afkUsers = new Map();
-
-if (message.content.startsWith(".afk")) {
-  const reason = message.content.slice(4).trim();
-  if (!reason) return message.reply("Please provide a reason for AFK.");
-  
-  afkUsers.set(message.author.id, reason);
-  return message.reply(`You are now AFK: "${reason}" 🥀`);
-}
-
-// Remove AFK if user sends a message
-if (afkUsers.has(message.author.id)) {
-  afkUsers.delete(message.author.id);
-  message.channel.send(`${message.author.username} is back from AFK! 🥀`);
-}
-
-// Check mentions
-message.mentions.users.forEach(user => {
-  if (afkUsers.has(user.id)) {
-    message.channel.send(`<@${user.id}> ${afkUsers.get(user.id)} 🥀`);
-  }
-});
-
+  // --- RANDOM MESSAGES EVERY 3 HOURS ---
   setInterval(async () => {
     try {
       const channel = client.channels.cache.get(RANDOM_CHANNEL);

@@ -171,6 +171,30 @@ client.once("ready", () => {
     "👉 ⏱️",
     "yea no shit 🥀"
   ];
+  
+  // --- AFK SYSTEM ---
+const afkUsers = new Map();
+
+if (message.content.startsWith(".afk")) {
+  const reason = message.content.slice(4).trim();
+  if (!reason) return message.reply("Please provide a reason for AFK.");
+  
+  afkUsers.set(message.author.id, reason);
+  return message.reply(`You are now AFK: "${reason}" 🥀`);
+}
+
+// Remove AFK if user sends a message
+if (afkUsers.has(message.author.id)) {
+  afkUsers.delete(message.author.id);
+  message.channel.send(`${message.author.username} is back from AFK! 🥀`);
+}
+
+// Check mentions
+message.mentions.users.forEach(user => {
+  if (afkUsers.has(user.id)) {
+    message.channel.send(`<@${user.id}> ${afkUsers.get(user.id)} 🥀`);
+  }
+});
 
   setInterval(async () => {
     try {

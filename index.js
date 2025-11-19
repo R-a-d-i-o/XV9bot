@@ -159,20 +159,32 @@ client.on("messageCreate", async (message) => {
 });
 
 /* --- READY EVENT --- */
-client.once("clientReady", () => {
+client.once("ready", () => {
   console.log(`Logged in as ${client.user.tag}`);
 
-  const KEEP_ALIVE_CHANNEL = "1440258431226478693";
+  /* --- RANDOM MESSAGES EVERY 3 HOURS --- */
+  const RANDOM_CHANNEL = "1440258431226478693";
+  const RANDOM_MESSAGES = [
+    "Get a load of this guy 🥀",
+    "Sybau twin 💔",
+    "Get a job 🥀",
+    "👉 ⏱️",
+    "yea no shit 🥀"
+  ];
 
   setInterval(async () => {
     try {
-      const channel = client.channels.cache.get(KEEP_ALIVE_CHANNEL);
+      const channel = client.channels.cache.get(RANDOM_CHANNEL);
       if (!channel) return;
-      await channel.send(`<@${client.user.id}> staying alive... 🤖`);
+
+      const msg = RANDOM_MESSAGES[Math.floor(Math.random() * RANDOM_MESSAGES.length)];
+      await channel.send(msg);
+
+      console.log(`🕒 Random message sent: ${msg}`);
     } catch (err) {
-      console.error("Keep-alive message failed:", err);
+      console.error("Random message failed:", err);
     }
-  }, 2 * 60 * 1000); // every 2 minutes
+  }, 3 * 60 * 60 * 1000); // 3 hours
 });
 
 /* --- LOGIN --- */

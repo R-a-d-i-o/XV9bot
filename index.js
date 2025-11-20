@@ -19,8 +19,8 @@ const client = new Client({
 /* ---------------------------------------------------
    CONFIG
 --------------------------------------------------- */
-const WELCOME_CHANNEL_ID = "858382440241561611";
-const RANDOM_CHANNEL = "858382440241561611";
+const WELCOME_CHANNEL_ID = "858382440241561611"; // Welcome GIF channel
+const RANDOM_CHANNEL = "858382440241561611";     // Fixed random messages channel
 
 const WELCOME_GIF = './welcome gif.gif';
 const KINGDOM_GIF = './KINGDOM KAM.gif';
@@ -105,9 +105,7 @@ client.on("messageCreate", async (message) => {
   /* -----------------------------------------------
      BASIC COMMANDS
   --------------------------------------------------- */
-  if (message.content === ".ping") {
-    return message.channel.send("Pong! 🏓");
-  }
+  if (message.content === ".ping") return message.channel.send("Pong! 🏓");
 
   if (message.content === ".mem") {
     await message.channel.send(`Total members: ${message.guild.memberCount}`);
@@ -122,7 +120,7 @@ client.on("messageCreate", async (message) => {
 
   /* -----------------------------------------------
      TEST RANDOM MESSAGE COMMAND
-     Sends random message in RANDOM_CHANNEL
+     Always sends to RANDOM_CHANNEL (fixed ID)
   --------------------------------------------------- */
   if (message.content === ".testrandom") {
     try {
@@ -242,7 +240,7 @@ client.once("ready", () => {
     } catch (err) {
       console.error("Random message error:", err);
     }
-  }, 3 * 60 * 60 * 1000); // 3 hours
+  }, 3 * 60 * 60 * 1000);
 });
 
 /* ---------------------------------------------------

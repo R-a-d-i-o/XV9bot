@@ -22,7 +22,7 @@ const BUST_SCENARIOS = [
   { message: "just busted !!", gif: './KINGDOM KAM.gif' }
 ];
 const KINGDOM_GIF = './KINGDOM KAM.gif';
-const RANDOM_CHANNEL = "1440258431226478693";
+const RANDOM_CHANNEL = "858382440241561611";
 const RANDOM_MESSAGES = [
   "Get a load of this guy 🥀",
   "Sybau twin 💔",

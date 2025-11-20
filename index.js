@@ -133,36 +133,33 @@ client.on("messageCreate", async (message) => {
     return;
   }
 
-  /* -----------------------------------------------
-     .bust — NOW YOU MUST TAG A USER
-  --------------------------------------------------- */
-  if (message.content.startsWith(".bust")) {
-    const target = message.mentions.users.first();
-    if (!target) {
-      return message.reply("Tag someone to bust them 😭");
+ /* -----------------------------------------------
+   .bust COMMAND
+--------------------------------------------------- */
+if (message.content.startsWith(".bust")) {
+  // If no tag, target = the user who sent the command
+  const target = message.mentions.users.first() || message.author;
+
+  const scenario = BUST_SCENARIOS[Math.floor(Math.random() * BUST_SCENARIOS.length)];
+  const gifPath = scenario.gif;
+
+  try {
+    if (fs.existsSync(gifPath)) {
+      await message.channel.send({
+        content: `<@${target.id}> ${scenario.message}`,
+        files: [gifPath],
+        allowedMentions: { users: [target.id] }
+      });
+    } else {
+      await message.channel.send(`<@${target.id}> ${scenario.message}`);
     }
 
-    const scenario = BUST_SCENARIOS[Math.floor(Math.random() * BUST_SCENARIOS.length)];
-    const gifPath = scenario.gif;
-
-    try {
-      if (fs.existsSync(gifPath)) {
-        await message.channel.send({
-          content: `<@${target.id}> ${scenario.message}`,
-          files: [gifPath],
-          allowedMentions: { users: [target.id] }
-        });
-      } else {
-        await message.channel.send(`<@${target.id}> ${scenario.message}`);
-      }
-
-      return del();
-    } catch (err) {
-      console.error("❌ .bust error:", err);
-      message.channel.send("Something went wrong.");
-    }
+    return message.delete().catch(() => {});
+  } catch (err) {
+    console.error("❌ .bust error:", err);
+    message.channel.send("Something went wrong.");
   }
-
+}
   /* -----------------------------------------------
      KINGDOM COMMAND
   --------------------------------------------------- */

@@ -19,8 +19,8 @@ const client = new Client({
 /* ---------------------------------------------------
    CONFIG
 --------------------------------------------------- */
-const WELCOME_CHANNEL_ID = "858382440241561611"; // Welcome GIF channel
-const RANDOM_CHANNEL = "858382440241561611";     // Fixed random messages channel
+const WELCOME_CHANNEL_ID = "858382440241561611";
+const RANDOM_CHANNEL = "858382440241561611";
 
 const WELCOME_GIF = './welcome gif.gif';
 const KINGDOM_GIF = './KINGDOM KAM.gif';
@@ -64,9 +64,6 @@ client.on("guildMemberAdd", async (member) => {
         files: [WELCOME_GIF],
         allowedMentions: { users: [member.user.id] }
       });
-      console.log(`✅ Sent welcome GIF to ${member.user.tag}`);
-    } else {
-      console.log(`⚠️ Missing: ${WELCOME_GIF}`);
     }
   } catch (err) {
     console.error("❌ Failed to send welcome GIF:", err);
@@ -114,13 +111,14 @@ client.on("messageCreate", async (message) => {
 
   if (message.content.startsWith(".pfp")) {
     const user = message.mentions.users.first() || message.author;
-    await message.channel.send({ files: [user.displayAvatarURL({ size: 512, dynamic: true })] });
+    await message.channel.send({
+      files: [user.displayAvatarURL({ size: 512, dynamic: true })]
+    });
     return del();
   }
 
   /* -----------------------------------------------
-     TEST RANDOM MESSAGE COMMAND
-     Always sends to RANDOM_CHANNEL (fixed ID)
+     TEST RANDOM MESSAGE
   --------------------------------------------------- */
   if (message.content === ".testrandom") {
     try {
@@ -129,47 +127,39 @@ client.on("messageCreate", async (message) => {
 
       const msg = RANDOM_MESSAGES[Math.floor(Math.random() * RANDOM_MESSAGES.length)];
       await channel.send(msg);
-      console.log(`🧪 Test random sent in RANDOM_CHANNEL: ${msg}`);
-    } catch (err) {
-      console.error("❌ Test random failed:", err);
+    } catch {
       message.reply("Test failed.");
     }
     return;
   }
 
   /* -----------------------------------------------
-     .bust COMMAND
+     .bust — NOW YOU MUST TAG A USER
   --------------------------------------------------- */
-  if (message.content === ".bust") {
+  if (message.content.startsWith(".bust")) {
+    const target = message.mentions.users.first();
+    if (!target) {
+      return message.reply("Tag someone to bust them 😭");
+    }
+
+    const scenario = BUST_SCENARIOS[Math.floor(Math.random() * BUST_SCENARIOS.length)];
+    const gifPath = scenario.gif;
+
     try {
-      const onlineMembers = message.guild.members.cache.filter(m => {
-        const s = m.presence?.status;
-        return (["online", "idle", "dnd"].includes(s) && !m.user.bot);
-      });
-
-      if (onlineMembers.size === 0) {
-        await message.reply("Nobody online to bust 😭");
-        return del();
-      }
-
-      const randomMember = onlineMembers.random();
-      const scenario = BUST_SCENARIOS[Math.floor(Math.random() * BUST_SCENARIOS.length)];
-
-      if (fs.existsSync(scenario.gif)) {
+      if (fs.existsSync(gifPath)) {
         await message.channel.send({
-          content: `<@${randomMember.user.id}> ${scenario.message}`,
-          files: [scenario.gif],
-          allowedMentions: { users: [randomMember.user.id] }
+          content: `<@${target.id}> ${scenario.message}`,
+          files: [gifPath],
+          allowedMentions: { users: [target.id] }
         });
       } else {
-        await message.channel.send(`<@${randomMember.user.id}> ${scenario.message}`);
-        console.log(`⚠️ Missing GIF: ${scenario.gif}`);
+        await message.channel.send(`<@${target.id}> ${scenario.message}`);
       }
 
       return del();
     } catch (err) {
       console.error("❌ .bust error:", err);
-      return message.channel.send("Something went wrong.");
+      message.channel.send("Something went wrong.");
     }
   }
 
@@ -189,7 +179,7 @@ client.on("messageCreate", async (message) => {
   }
 
   /* -----------------------------------------------
-     FUNNY HOT AUNTIES COMMAND
+     HOT AUNTIES COMMAND
   --------------------------------------------------- */
   if (message.content.startsWith(".hotauntiesnearme")) {
     const hotNumbers = ["03075386948","03410014849","03000540786","03117078408","03098129729"];
@@ -200,8 +190,10 @@ client.on("messageCreate", async (message) => {
       "{number} will strangle ur cock with her bussy tonight 😈",
       "{number} is ready for a 3some 😏"
     ];
+
     const num = hotNumbers[Math.floor(Math.random() * hotNumbers.length)];
     const msg = hotMessages[Math.floor(Math.random() * hotMessages.length)];
+
     await message.channel.send(msg.replace("{number}", num));
     return del();
   }
@@ -213,34 +205,31 @@ client.on("messageCreate", async (message) => {
     if (fs.existsSync(WELCOME_GIF)) {
       await message.channel.send({
         content: `Welcome <@${message.author.id}>!!`,
-        files: [WELCOME_GIF],
-        allowedMentions: { users: [message.author.id] }
+        files: [WELCOME_GIF]
       });
-    } else {
-      await message.channel.send(`Welcome <@${message.author.id}>!! (GIF missing)`);
     }
     return del();
   }
 });
 
 /* ---------------------------------------------------
-   READY EVENT + AUTO RANDOM MESSAGES
+   READY EVENT + AUTO RANDOM EVERY 1.5 HOURS
 --------------------------------------------------- */
 client.once("ready", () => {
   console.log(`Logged in as ${client.user.tag}`);
 
-  // Auto random message every 3 hours
   setInterval(async () => {
     try {
       const channel = client.channels.cache.get(RANDOM_CHANNEL);
       if (!channel) return;
+
       const msg = RANDOM_MESSAGES[Math.floor(Math.random() * RANDOM_MESSAGES.length)];
       await channel.send(msg);
-      console.log(`🕒 Auto random message: ${msg}`);
+
     } catch (err) {
       console.error("Random message error:", err);
     }
-  }, 3 * 60 * 60 * 1000);
+  }, 1.5 * 60 * 60 * 1000); // 1.5 hours
 });
 
 /* ---------------------------------------------------

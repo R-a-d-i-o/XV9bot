@@ -91,13 +91,11 @@ client.on("messageCreate", async (message) => {
     return message.reply(`You are now AFK: "${reason}" 🥀`);
   }
 
-  // Remove AFK on any message
   if (afkUsers.has(message.author.id)) {
     afkUsers.delete(message.author.id);
     message.channel.send(`${message.author.username} is back from AFK! 🥀`);
   }
 
-  // Notifying when mentioning AFK users
   message.mentions.users.forEach(user => {
     if (afkUsers.has(user.id)) {
       message.channel.send(`<@${user.id}> ${afkUsers.get(user.id)} 🥀`);
@@ -107,19 +105,37 @@ client.on("messageCreate", async (message) => {
   /* -----------------------------------------------
      BASIC COMMANDS
   --------------------------------------------------- */
-
-  // .ping
   if (message.content === ".ping") {
     return message.channel.send("Pong! 🏓");
   }
 
+  if (message.content === ".mem") {
+    await message.channel.send(`Total members: ${message.guild.memberCount}`);
+    return del();
+  }
+
+  if (message.content.startsWith(".pfp")) {
+    const user = message.mentions.users.first() || message.author;
+    await message.channel.send({ files: [user.displayAvatarURL({ size: 512, dynamic: true })] });
+    return del();
+  }
+
   /* -----------------------------------------------
-     TEST RANDOM MESSAGE COMMAND (works 100%)
+     TEST RANDOM MESSAGE COMMAND
+     Sends random message in RANDOM_CHANNEL
   --------------------------------------------------- */
   if (message.content === ".testrandom") {
-    const msg = RANDOM_MESSAGES[Math.floor(Math.random() * RANDOM_MESSAGES.length)];
-    await message.reply(msg);
-    console.log(`🧪 Test random sent: ${msg}`);
+    try {
+      const channel = client.channels.cache.get(RANDOM_CHANNEL);
+      if (!channel) return message.reply("Random channel not found.");
+
+      const msg = RANDOM_MESSAGES[Math.floor(Math.random() * RANDOM_MESSAGES.length)];
+      await channel.send(msg);
+      console.log(`🧪 Test random sent in RANDOM_CHANNEL: ${msg}`);
+    } catch (err) {
+      console.error("❌ Test random failed:", err);
+      message.reply("Test failed.");
+    }
     return;
   }
 
@@ -175,23 +191,6 @@ client.on("messageCreate", async (message) => {
   }
 
   /* -----------------------------------------------
-     .mem COMMAND
-  --------------------------------------------------- */
-  if (message.content === ".mem") {
-    await message.channel.send(`Total members: ${message.guild.memberCount}`);
-    return del();
-  }
-
-  /* -----------------------------------------------
-     .pfp COMMAND
-  --------------------------------------------------- */
-  if (message.content.startsWith(".pfp")) {
-    const user = message.mentions.users.first() || message.author;
-    await message.channel.send({ files: [user.displayAvatarURL({ size: 512, dynamic: true })] });
-    return del();
-  }
-
-  /* -----------------------------------------------
      FUNNY HOT AUNTIES COMMAND
   --------------------------------------------------- */
   if (message.content.startsWith(".hotauntiesnearme")) {
@@ -205,7 +204,6 @@ client.on("messageCreate", async (message) => {
     ];
     const num = hotNumbers[Math.floor(Math.random() * hotNumbers.length)];
     const msg = hotMessages[Math.floor(Math.random() * hotMessages.length)];
-    
     await message.channel.send(msg.replace("{number}", num));
     return del();
   }
@@ -238,21 +236,16 @@ client.once("ready", () => {
     try {
       const channel = client.channels.cache.get(RANDOM_CHANNEL);
       if (!channel) return;
-
       const msg = RANDOM_MESSAGES[Math.floor(Math.random() * RANDOM_MESSAGES.length)];
       await channel.send(msg);
-
       console.log(`🕒 Auto random message: ${msg}`);
     } catch (err) {
       console.error("Random message error:", err);
     }
-  }, 3 * 60 * 60 * 1000);
+  }, 3 * 60 * 60 * 1000); // 3 hours
 });
 
 /* ---------------------------------------------------
    LOGIN
 --------------------------------------------------- */
-client.login(process.env.BOT_TOKEN);
-
-/* --- LOGIN --- */
 client.login(process.env.BOT_TOKEN);

@@ -80,7 +80,6 @@ client.on("guildMemberAdd", async (member) => {
 --------------------------------------------------- */
 client.on("messageCreate", async (message) => {
   if (message.author.bot) return;
-  const del = () => message.delete().catch(() => {});
 
   /* -----------------------------------------------
      AFK COMMAND
@@ -151,7 +150,7 @@ client.on("messageCreate", async (message) => {
 
   if (message.content === ".mem") {
     await message.channel.send(`Total members: ${message.guild.memberCount}`);
-    return del();
+    return;
   }
 
   if (message.content.startsWith(".pfp")) {
@@ -159,19 +158,6 @@ client.on("messageCreate", async (message) => {
     await message.channel.send({
       files: [user.displayAvatarURL({ size: 512, dynamic: true })]
     });
-    return del();
-  }
-
-  if (message.content === ".testrandom") {
-    try {
-      const channel = client.channels.cache.get(RANDOM_CHANNEL);
-      if (!channel) return message.reply("Random channel not found.");
-
-      const msg = RANDOM_MESSAGES[Math.floor(Math.random() * RANDOM_MESSAGES.length)];
-      await channel.send(msg);
-    } catch {
-      message.reply("Test failed.");
-    }
     return;
   }
 
@@ -193,7 +179,6 @@ client.on("messageCreate", async (message) => {
       } else {
         await message.channel.send(`<@${target.id}> ${scenario.message}`);
       }
-      return message.delete().catch(() => {});
     } catch (err) {
       console.error("❌ .bust error:", err);
       message.channel.send("Something went wrong.");
@@ -225,7 +210,6 @@ client.on("messageCreate", async (message) => {
     ];
 
     try {
-      await message.delete().catch(() => {});
       const running = runningMsgs[Math.floor(Math.random() * runningMsgs.length)];
       const condition = finalConditions[Math.floor(Math.random() * finalConditions.length)];
 
@@ -264,7 +248,7 @@ client.on("messageCreate", async (message) => {
 
     try {
       const firstMsg = firstMsgs[Math.floor(Math.random() * firstMsgs.length)];
-      const sentMsg = await message.channel.send(firstMsg);
+      await message.channel.send(firstMsg);
 
       // Reply collector
       const filter = (m) => m.author.id === target.id;
@@ -275,7 +259,6 @@ client.on("messageCreate", async (message) => {
         await message.channel.send(followUp);
       });
 
-      return del();
     } catch (err) {
       console.error("❌ .therapy error:", err);
     }
@@ -285,26 +268,39 @@ client.on("messageCreate", async (message) => {
      .commands COMMAND
   --------------------------------------------------- */
   if (message.content === ".commands") {
-    const commandsList = [
-      ".ping", ".mem", ".pfp", ".testrandom", ".bust",
-      ".diagnosis", ".therapy", ".norandom", ".yesrandom",
-      ".hotauntiesnearme", ".testwelcome"
+    const commandsWithDescriptions = [
+      "**.ping** – Checks if the bot is online. Replies with Pong! 🏓",
+      "**.mem** – Shows total members in the server.",
+      "**.pfp [@user]** – Sends profile picture of a user or yourself.",
+      "**.bust [@user]** – Sends a random 'busted' message and GIF to a user.",
+      "**.diagnosis [@user]** – Runs a funny random 'diagnosis' on a user.",
+      "**.therapy [@user]** – Starts a therapy interaction; follow-up after user reply.",
+      "**.norandom** – Stops the bot from sending automatic random messages.",
+      "**.yesrandom** – Re-enables random messages and sends one immediately.",
+      "**.hotauntiesnearme** – Sends a random funny 'hot aunties' message."
     ];
-    return message.channel.send(`Available commands:\n${commandsList.join("\n")}`);
+    return message.channel.send(`Available commands:\n${commandsWithDescriptions.join("\n")}`);
   }
 
   /* -----------------------------------------------
-     TEST WELCOME
+     HOT AUNTIES COMMAND
   --------------------------------------------------- */
-  if (message.content === ".testwelcome") {
-    if (fs.existsSync(WELCOME_GIF)) {
-      await message.channel.send({
-        content: `Welcome <@${message.author.id}>!!`,
-        files: [WELCOME_GIF]
-      });
-    }
-    return del();
+  if (message.content.startsWith(".hotauntiesnearme")) {
+    const hotNumbers = ["03075386948","03410014849","03000540786","03117078408","03098129729"];
+    const hotMessages = [
+      "{number} wants some gawk gawk action 😍",
+      "{number} is feeling freaky 😍",
+      "{number} is feeling horny tonight 😈",
+      "{number} will strangle ur cock with her bussy tonight 😈",
+      "{number} is ready for a 3some 😏"
+    ];
+
+    const num = hotNumbers[Math.floor(Math.random() * hotNumbers.length)];
+    const msg = hotMessages[Math.floor(Math.random() * hotMessages.length)];
+
+    await message.channel.send(msg.replace("{number}", num));
   }
+
 });
 
 /* ---------------------------------------------------

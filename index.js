@@ -39,6 +39,12 @@ const RANDOM_MESSAGES = [
 ];
 
 /* ---------------------------------------------------
+   RANDOM MESSAGE TOGGLE SYSTEM
+--------------------------------------------------- */
+let randomEnabled = true;
+let randomInterval = null;
+
+/* ---------------------------------------------------
    EXPRESS KEEP-ALIVE
 --------------------------------------------------- */
 const app = express();
@@ -100,6 +106,46 @@ client.on("messageCreate", async (message) => {
   });
 
   /* -----------------------------------------------
+     DISABLE RANDOM MESSAGES
+  --------------------------------------------------- */
+  if (message.content === ".norandom") {
+    randomEnabled = false;
+    clearInterval(randomInterval);
+    return message.channel.send("❌ Random messages disabled.");
+  }
+
+  /* -----------------------------------------------
+     ENABLE RANDOM MESSAGES + INSTANT SEND + RESET TIMER
+  --------------------------------------------------- */
+  if (message.content === ".yesrandom") {
+    randomEnabled = true;
+    clearInterval(randomInterval);
+
+    const channel = client.channels.cache.get(RANDOM_CHANNEL);
+    if (channel) {
+      const msg = RANDOM_MESSAGES[Math.floor(Math.random() * RANDOM_MESSAGES.length)];
+      channel.send(msg);
+    }
+
+    randomInterval = setInterval(async () => {
+      if (!randomEnabled) return;
+
+      try {
+        const channel = client.channels.cache.get(RANDOM_CHANNEL);
+        if (!channel) return;
+
+        const msg = RANDOM_MESSAGES[Math.floor(Math.random() * RANDOM_MESSAGES.length)];
+        channel.send(msg);
+
+      } catch (err) {
+        console.error("Random message error:", err);
+      }
+    }, 1.5 * 60 * 60 * 1000);
+
+    return message.channel.send("✅ Random messages enabled.");
+  }
+
+  /* -----------------------------------------------
      BASIC COMMANDS
   --------------------------------------------------- */
   if (message.content === ".ping") return message.channel.send("Pong! 🏓");
@@ -133,33 +179,31 @@ client.on("messageCreate", async (message) => {
     return;
   }
 
- /* -----------------------------------------------
-   .bust COMMAND
---------------------------------------------------- */
-if (message.content.startsWith(".bust")) {
-  // If no tag, target = the user who sent the command
-  const target = message.mentions.users.first() || message.author;
+  /* -----------------------------------------------
+     .bust COMMAND
+  --------------------------------------------------- */
+  if (message.content.startsWith(".bust")) {
+    const target = message.mentions.users.first() || message.author;
+    const scenario = BUST_SCENARIOS[Math.floor(Math.random() * BUST_SCENARIOS.length)];
+    const gifPath = scenario.gif;
 
-  const scenario = BUST_SCENARIOS[Math.floor(Math.random() * BUST_SCENARIOS.length)];
-  const gifPath = scenario.gif;
-
-  try {
-    if (fs.existsSync(gifPath)) {
-      await message.channel.send({
-        content: `<@${target.id}> ${scenario.message}`,
-        files: [gifPath],
-        allowedMentions: { users: [target.id] }
-      });
-    } else {
-      await message.channel.send(`<@${target.id}> ${scenario.message}`);
+    try {
+      if (fs.existsSync(gifPath)) {
+        await message.channel.send({
+          content: `<@${target.id}> ${scenario.message}`,
+          files: [gifPath],
+          allowedMentions: { users: [target.id] }
+        });
+      } else {
+        await message.channel.send(`<@${target.id}> ${scenario.message}`);
+      }
+      return message.delete().catch(() => {});
+    } catch (err) {
+      console.error("❌ .bust error:", err);
+      message.channel.send("Something went wrong.");
     }
-
-    return message.delete().catch(() => {});
-  } catch (err) {
-    console.error("❌ .bust error:", err);
-    message.channel.send("Something went wrong.");
   }
-}
+
   /* -----------------------------------------------
      KINGDOM COMMAND
   --------------------------------------------------- */
@@ -210,12 +254,14 @@ if (message.content.startsWith(".bust")) {
 });
 
 /* ---------------------------------------------------
-   READY EVENT + AUTO RANDOM EVERY 1.5 HOURS
+   READY EVENT + INITIAL RANDOM TIMER
 --------------------------------------------------- */
 client.once("ready", () => {
   console.log(`Logged in as ${client.user.tag}`);
 
-  setInterval(async () => {
+  const sendRandom = async () => {
+    if (!randomEnabled) return;
+
     try {
       const channel = client.channels.cache.get(RANDOM_CHANNEL);
       if (!channel) return;
@@ -226,7 +272,9 @@ client.once("ready", () => {
     } catch (err) {
       console.error("Random message error:", err);
     }
-  }, 1.5 * 60 * 60 * 1000); // 1.5 hours
+  };
+
+  randomInterval = setInterval(sendRandom, 1.5 * 60 * 60 * 1000);
 });
 
 /* ---------------------------------------------------

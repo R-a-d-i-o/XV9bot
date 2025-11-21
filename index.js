@@ -23,7 +23,6 @@ const WELCOME_CHANNEL_ID = "858382440241561611";
 const RANDOM_CHANNEL = "858382440241561611";
 
 const WELCOME_GIF = './welcome gif.gif';
-const KINGDOM_GIF = './KINGDOM KAM.gif';
 
 const BUST_SCENARIOS = [
   { message: "just got busted !!", gif: './captured.gif' },
@@ -163,9 +162,6 @@ client.on("messageCreate", async (message) => {
     return del();
   }
 
-  /* -----------------------------------------------
-     TEST RANDOM MESSAGE
-  --------------------------------------------------- */
   if (message.content === ".testrandom") {
     try {
       const channel = client.channels.cache.get(RANDOM_CHANNEL);
@@ -205,38 +201,96 @@ client.on("messageCreate", async (message) => {
   }
 
   /* -----------------------------------------------
-     KINGDOM COMMAND
+     .diagnosis COMMAND
   --------------------------------------------------- */
-  if ([".kingdom", ".kam"].includes(message.content)) {
-    if (fs.existsSync(KINGDOM_GIF)) {
-      await message.channel.send({
-        content: "🔥 KINGDOM KAM 🔥",
-        files: [KINGDOM_GIF]
-      });
-    } else {
-      await message.channel.send("🔥 KINGDOM KAM 🔥 (GIF missing)");
+  if (message.content.startsWith(".diagnosis")) {
+    const target = message.mentions.users.first() || message.author;
+    const runningMsgs = [
+      `🖥️ Checking <@${target.id}>’s braincache for corrupted files…`,
+      `⚙️ Running diagnostics on <@${target.id}>…`,
+      `🔍 Scanning <@${target.id}> for brain activity…`,
+      `💀 Testing <@${target.id}>’s mental stability… results not looking good`,
+      `📡 Uploading <@${target.id}>’s stupidity levels to the Chat GPT…`,
+      `🫠 Calculating goofiness index for <@${target.id}>…`,
+      `🧪 Performing cringe-level analysis on <@${target.id}>…`,
+      `🕵️‍♂️ Tracking missing neurons in <@${target.id}>’s brain…`
+    ];
+    const finalConditions = [
+      "Condition: skill issue",
+      "Condition: Terminal Lobotomy",
+      "Condition: Bitch Syndrome",
+      "Condition: Severe Retard Syndrome",
+      "Condition: Horny Havoc Syndrome",
+      "Condition: Fapocalypse Syndrome"
+    ];
+
+    try {
+      await message.delete().catch(() => {});
+      const running = runningMsgs[Math.floor(Math.random() * runningMsgs.length)];
+      const condition = finalConditions[Math.floor(Math.random() * finalConditions.length)];
+
+      await message.channel.send(running);
+      setTimeout(async () => {
+        await message.channel.send(condition);
+      }, 1500);
+    } catch (err) {
+      console.error("❌ .diagnosis error:", err);
     }
-    return del();
   }
 
   /* -----------------------------------------------
-     HOT AUNTIES COMMAND
+     .therapy COMMAND
   --------------------------------------------------- */
-  if (message.content.startsWith(".hotauntiesnearme")) {
-    const hotNumbers = ["03075386948","03410014849","03000540786","03117078408","03098129729"];
-    const hotMessages = [
-      "{number} wants some gawk gawk action 😍",
-      "{number} is feeling freaky 😍",
-      "{number} is feeling horny tonight 😈",
-      "{number} will strangle ur cock with her bussy tonight 😈",
-      "{number} is ready for a 3some 😏"
+  if (message.content.startsWith(".therapy")) {
+    const target = message.mentions.users.first() || message.author;
+    const firstMsgs = [
+      `🛋️ Let’s take it from the top, <@${target.id}>… 🧠💀`,
+      `🧐 Kay <@${target.id}>, what exactly possessed you today? 🤯`,
+      `💻 Tell me what’s going on in that Windows-98 brain of yours 🕹️`,
+      `⚡ Alright <@${target.id}>, spill the chaos in your head 🧩🔥`,
+      `🧪 Brain audit time, <@${target.id}>… explain yourself 🧠`
+    ];
+    const followUps = [
+      "😤 I don’t get paid enough for this shit",
+      "⏳ Wow, looks like your thought process is buffering… PERMANENTLY",
+      "🫠 Bruh… your neuroses are flexing harder than your nonexistent libido",
+      "🤖 I would have helped you, but even ChatGPT gave up",
+      "💪 Brotha, you generated more stamina by fapping than any other sport… how TF am I supposed to help you?",
+      "❤️ You need to spend more time with family <3",
+      "🥰 Not all heroes wear capes… at least you tried",
+      "🧸 Chill, <@${target.id}>… it’s okay to be a little chaotic sometimes",
+      "🌱 Maybe take a walk outside, could reboot the system"
     ];
 
-    const num = hotNumbers[Math.floor(Math.random() * hotNumbers.length)];
-    const msg = hotMessages[Math.floor(Math.random() * hotMessages.length)];
+    try {
+      const firstMsg = firstMsgs[Math.floor(Math.random() * firstMsgs.length)];
+      const sentMsg = await message.channel.send(firstMsg);
 
-    await message.channel.send(msg.replace("{number}", num));
-    return del();
+      // Reply collector
+      const filter = (m) => m.author.id === target.id;
+      const collector = message.channel.createMessageCollector({ filter, max: 1, time: 300000 });
+
+      collector.on("collect", async () => {
+        const followUp = followUps[Math.floor(Math.random() * followUps.length)];
+        await message.channel.send(followUp);
+      });
+
+      return del();
+    } catch (err) {
+      console.error("❌ .therapy error:", err);
+    }
+  }
+
+  /* -----------------------------------------------
+     .commands COMMAND
+  --------------------------------------------------- */
+  if (message.content === ".commands") {
+    const commandsList = [
+      ".ping", ".mem", ".pfp", ".testrandom", ".bust",
+      ".diagnosis", ".therapy", ".norandom", ".yesrandom",
+      ".hotauntiesnearme", ".testwelcome"
+    ];
+    return message.channel.send(`Available commands:\n${commandsList.join("\n")}`);
   }
 
   /* -----------------------------------------------

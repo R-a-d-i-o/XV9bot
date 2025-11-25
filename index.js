@@ -37,7 +37,7 @@ const RANDOM_MESSAGES = [
 ];
 
 /* ---------------------------------------------------
-   RANDOM MESSAGE TOGGLE
+   RANDOM SYSTEM
 --------------------------------------------------- */
 let randomEnabled = true;
 let randomInterval = null;
@@ -50,7 +50,7 @@ function startRandomMessages(channel) {
     if (!randomEnabled) return;
     const msg = RANDOM_MESSAGES[Math.floor(Math.random() * RANDOM_MESSAGES.length)];
     channel.send(msg);
-  }, 2 * 60 * 60 * 1000); // 2 HOURS
+  }, 2 * 60 * 60 * 1000);
 }
 
 /* ---------------------------------------------------
@@ -71,6 +71,24 @@ function warnUser(userID) {
 }
 
 /* ---------------------------------------------------
+   WELCOME SYSTEM (FIXED + RESTORED)
+--------------------------------------------------- */
+client.on("guildMemberAdd", async (member) => {
+  const channel = member.guild.channels.cache.get(WELCOME_CHANNEL_ID);
+  if (!channel) return;
+
+  if (fs.existsSync(WELCOME_GIF)) {
+    await channel.send({
+      content: `Welcome <@${member.id}> 👑`,
+      files: [WELCOME_GIF],
+      allowedMentions: { users: [member.id] }
+    });
+  } else {
+    await channel.send(`Welcome <@${member.id}> 👑`);
+  }
+});
+
+/* ---------------------------------------------------
    BOT READY
 --------------------------------------------------- */
 client.on('ready', () => {
@@ -89,7 +107,6 @@ client.on('messageCreate', async (message) => {
   const content = rawContent.toLowerCase();
   const channel = client.channels.cache.get(RANDOM_CHANNEL);
 
-  // Commands whose messages should NOT be deleted
   const noDelete = [
     ".diagnose",
     ".therapy",
@@ -109,17 +126,17 @@ client.on('messageCreate', async (message) => {
   -------------------- */
   if (content.startsWith(".warn")) {
     deleteIfAllowed(".warn");
+
     const target = message.mentions.members.first();
     if (!target) return message.channel.send("Mention a user to warn.");
 
-    const warnCount = warnUser(target.id);
+    const count = warnUser(target.id);
 
-    // Same message for both warns
     await message.channel.send(`${target.user.username} ko **PHANSI** mubarak ho`);
 
-    if (warnCount >= 2) {
+    if (count >= 2) {
       target.kick("2 warnings reached").catch(() => {});
-      warns[target.id] = 0; // reset after kick
+      warns[target.id] = 0;
     }
     return;
   }
@@ -129,6 +146,7 @@ client.on('messageCreate', async (message) => {
   -------------------- */
   if (content.startsWith(".kick")) {
     deleteIfAllowed(".kick");
+
     const target = message.mentions.members.first();
     if (!target) return message.channel.send("Mention a user to kick.");
 
@@ -142,6 +160,7 @@ client.on('messageCreate', async (message) => {
   -------------------- */
   if (content.startsWith(".bust")) {
     deleteIfAllowed(".bust");
+
     const user = message.mentions.users.first() || message.author;
     const scenario = BUST_SCENARIOS[Math.floor(Math.random() * BUST_SCENARIOS.length)];
 
@@ -162,16 +181,18 @@ client.on('messageCreate', async (message) => {
   -------------------- */
   if (content.startsWith(".diagnose")) {
     const target = message.mentions.users.first() || message.author;
+
     const runningMsgs = [
-      `🖥️ Checking <@${target.id}>’s braincache for corrupted files…`,
+      `🖥️ Checking <@${target.id}>’s braincache…`,
       `⚙️ Running diagnostics on <@${target.id}>…`,
       `🔍 Scanning <@${target.id}> for brain activity…`,
-      `💀 Testing <@${target.id}>’s mental stability… results not looking good`,
-      `📡 Uploading <@${target.id}>’s stupidity levels to the Chat GPT…`,
-      `🫠 Calculating goofiness index for <@${target.id}>…`,
-      `🧪 Performing cringe-level analysis on <@${target.id}>…`,
-      `🕵️‍♂️ Tracking missing neurons in <@${target.id}>’s brain…`
+      `💀 Testing <@${target.id}>’s mental stability…`,
+      `📡 Uploading <@${target.id}>’s stupidity levels…`,
+      `🫠 Calculating goofiness index…`,
+      `🧪 Performing cringe-level analysis…`,
+      `🕵️‍♂️ Tracking missing neurons…`
     ];
+
     const finalConditions = [
       "Condition: skill issue",
       "Condition: Terminal Lobotomy",
@@ -180,12 +201,13 @@ client.on('messageCreate', async (message) => {
       "Condition: Horny Havoc Syndrome",
       "Condition: Fapocalypse Syndrome"
     ];
+
     const running = runningMsgs[Math.floor(Math.random() * runningMsgs.length)];
     const condition = finalConditions[Math.floor(Math.random() * finalConditions.length)];
 
     await message.channel.send(running);
-    setTimeout(async () => {
-      await message.channel.send(condition);
+    setTimeout(() => {
+      message.channel.send(condition);
     }, 1500);
     return;
   }
@@ -198,27 +220,25 @@ client.on('messageCreate', async (message) => {
 
     const firstMsgs = [
       `🛋️ Let's take it from the top, <@${target.id}>…`,
-      `🧐 Okay <@${target.id}>, what exactly possessed you today?`,
+      `🧐 Okay <@${target.id}>, what possessed you today?`,
       `💻 Tell me what's going on in your brain.`,
-      `☕ Alright <@${target.id}>, spill the tea — what's bothering you?`,
-      `🧪 Brain audit time, <@${target.id}>… explain yourself 🧠`
+      `☕ Alright <@${target.id}>, spill the tea.`,
+      `🧪 Brain audit time… explain yourself.`
     ];
 
     const followUps = [
       "😤 I don’t get paid enough for this shit",
-      "🫠 Bruh… your neuroses are flexing harder than your nonexistent libido",
-      "🤖 I would have helped you, but even ChatGPT gave up",
-      "💪 Brotha, you generated more stamina by fapping than any other sport… how TF am I supposed to help you?",
-      "❤️ You need to spend more time with family <3",
-      "🥰 Not all heroes wear capes… at least you tried",
-      "🧸 Chill… it’s okay to be a little chaotic sometimes",
-      "🌱 Maybe take a walk outside, could reboot the system",
-      "🌙 Suffering is a valuable thing — without it, you cannot grow",
-      "🌤️ You’re doing better than you think — don’t be so hard on yourself.",
-      "🧠 Healing takes time, and you're doing fine.",
-      "✨ It’s okay to feel lost — that's how you find new directions.",
-      "🔥 You’ve pulled yourself together before — you can do it again.",
-      "❤️ You deserve peace, even when your mind tells you otherwise."
+      "🫠 Your neuroses are flexing harder than your libido",
+      "🤖 Even ChatGPT gave up on you",
+      "💪 Bro faps harder than he tries in life",
+      "❤️ Spend more time with family <3",
+      "🥰 At least you tried",
+      "🧸 Chill… it's okay",
+      "🌱 Go touch grass",
+      "🌙 Suffering = growth",
+      "✨ You're doing better than you think",
+      "🔥 You've survived worse",
+      "❤️ You deserve peace",
     ];
 
     const msg1 = firstMsgs[Math.floor(Math.random() * firstMsgs.length)];
@@ -226,10 +246,12 @@ client.on('messageCreate', async (message) => {
 
     const filter = m => m.author.id === target.id;
     const collector = message.channel.createMessageCollector({ filter, max: 1, time: 300000 });
-    collector.on("collect", async () => {
+
+    collector.on("collect", () => {
       const msg2 = followUps[Math.floor(Math.random() * followUps.length)];
-      await message.channel.send(msg2);
+      message.channel.send(msg2);
     });
+
     return;
   }
 
@@ -280,17 +302,17 @@ client.on('messageCreate', async (message) => {
   -------------------- */
   if (content === ".commands") {
     const commandsWithDescriptions = [
-      "**.ping** – Checks if the bot is online. Replies with Pong! 🏓",
-      "**.mem** – Shows total members in the server.",
-      "**.pfp [@user]** – Sends profile picture of a user or yourself.",
-      "**.bust [@user]** – Sends a random 'busted' message and GIF to a user.",
-      "**.diagnose [@user]** – Runs a funny random 'diagnosis' on a user.",
-      "**.therapy [@user]** – Starts a therapy interaction; follow-up after user reply.",
-      "**.norandom** – Stops the bot from sending automatic random messages.",
-      "**.yesrandom** – Re-enables random messages and sends one immediately.",
-      "**.hotauntiesnearme** – Sends a random funny 'hot aunties' message.",
-      "**.warn [@user]** – Warns a user; 2 warnings = auto-kick",
-      "**.kick [@user]** – Kicks a user manually"
+      "**.ping** – Bot check",
+      "**.mem** – Server member count",
+      "**.pfp [@user]** – Sends profile picture",
+      "**.bust [@user]** – Busted GIF",
+      "**.diagnose [@user]** – Funny diagnosis",
+      "**.therapy [@user]** – Therapy session",
+      "**.norandom** – Turn OFF random messages",
+      "**.yesrandom** – Turn ON random messages",
+      "**.hotauntiesnearme** – Hot aunties joke",
+      "**.warn [@user]** – Warn system",
+      "**.kick [@user]** – Kick user"
     ];
     message.channel.send(`Available commands:\n${commandsWithDescriptions.join("\n")}`);
     return;
@@ -302,11 +324,11 @@ client.on('messageCreate', async (message) => {
   if (content.startsWith(".hotauntiesnearme")) {
     const hotNumbers = ["03075386948","03410014849","03000540786","03117078408","03098129729"];
     const hotMessages = [
-      "{number} wants some gawk gawk action 😍",
+      "{number} wants some gawk gawk 😍",
       "{number} is feeling freaky 😍",
-      "{number} is feeling horny tonight 😈",
-      "{number} will strangle ur cock with her bussy tonight 😈",
-      "{number} is ready for a 3some 😏"
+      "{number} is horny tonight 😈",
+      "{number} will choke ur meat 😈",
+      "{number} ready for 3some 😏"
     ];
     const num = hotNumbers[Math.floor(Math.random() * hotNumbers.length)];
     const msg = hotMessages[Math.floor(Math.random() * hotMessages.length)];

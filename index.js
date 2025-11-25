@@ -83,14 +83,23 @@ client.on('ready', () => {
    MESSAGE HANDLER
 --------------------------------------------------- */
 client.on('messageCreate', async (message) => {
-  if (message.author.bot) return; // ignore bot messages
+  if (message.author.bot) return;
 
-  const rawContent = message.content;
+  const rawContent = message.content.trim();
   const content = rawContent.toLowerCase();
   const channel = client.channels.cache.get(RANDOM_CHANNEL);
 
   // Commands whose messages should NOT be deleted
-  const noDelete = [".diagnose", ".therapy", ".norandom", ".yesrandom"];
+  const noDelete = [
+    ".diagnose",
+    ".therapy",
+    ".norandom",
+    ".yesrandom",
+    ".ping",
+    ".commands",
+    ".hotauntiesnearme"
+  ];
+
   function deleteIfAllowed(cmd) {
     if (!noDelete.includes(cmd)) message.delete().catch(() => {});
   }
@@ -105,12 +114,12 @@ client.on('messageCreate', async (message) => {
 
     const warnCount = warnUser(target.id);
 
-    if (warnCount === 1) {
-      await message.channel.send(`${target.user.username} ko **PHANSI** mubarak ho`);
-    } else if (warnCount >= 2) {
-      await message.channel.send(`${target.user.username} ko **PHANSI** mubarak ho`);
+    // Same message for both warns
+    await message.channel.send(`${target.user.username} ko **PHANSI** mubarak ho`);
+
+    if (warnCount >= 2) {
       target.kick("2 warnings reached").catch(() => {});
-      warns[target.id] = 0;
+      warns[target.id] = 0; // reset after kick
     }
     return;
   }
@@ -196,13 +205,10 @@ client.on('messageCreate', async (message) => {
     ];
 
     const followUps = [
-      // Negative
       "😤 I don’t get paid enough for this shit",
       "🫠 Bruh… your neuroses are flexing harder than your nonexistent libido",
       "🤖 I would have helped you, but even ChatGPT gave up",
       "💪 Brotha, you generated more stamina by fapping than any other sport… how TF am I supposed to help you?",
-
-      // Positive
       "❤️ You need to spend more time with family <3",
       "🥰 Not all heroes wear capes… at least you tried",
       "🧸 Chill… it’s okay to be a little chaotic sometimes",
@@ -216,13 +222,10 @@ client.on('messageCreate', async (message) => {
     ];
 
     const msg1 = firstMsgs[Math.floor(Math.random() * firstMsgs.length)];
-
-    // Send first, wait for user reply before follow-up
     await message.channel.send(msg1);
 
     const filter = m => m.author.id === target.id;
     const collector = message.channel.createMessageCollector({ filter, max: 1, time: 300000 });
-
     collector.on("collect", async () => {
       const msg2 = followUps[Math.floor(Math.random() * followUps.length)];
       await message.channel.send(msg2);
@@ -251,7 +254,6 @@ client.on('messageCreate', async (message) => {
      .ping
   -------------------- */
   if (content === ".ping") {
-    deleteIfAllowed(".ping");
     message.channel.send("Pong! 🏓");
     return;
   }
@@ -260,7 +262,6 @@ client.on('messageCreate', async (message) => {
      .mem
   -------------------- */
   if (content === ".mem") {
-    deleteIfAllowed(".mem");
     message.channel.send(`Total members: ${message.guild.memberCount}`);
     return;
   }
@@ -269,7 +270,6 @@ client.on('messageCreate', async (message) => {
      .pfp
   -------------------- */
   if (content.startsWith(".pfp")) {
-    deleteIfAllowed(".pfp");
     const user = message.mentions.users.first() || message.author;
     message.channel.send({ files: [user.displayAvatarURL({ size: 512, dynamic: true })] });
     return;
@@ -300,8 +300,6 @@ client.on('messageCreate', async (message) => {
      .hotauntiesnearme
   -------------------- */
   if (content.startsWith(".hotauntiesnearme")) {
-    deleteIfAllowed(".hotauntiesnearme");
-
     const hotNumbers = ["03075386948","03410014849","03000540786","03117078408","03098129729"];
     const hotMessages = [
       "{number} wants some gawk gawk action 😍",
@@ -310,15 +308,14 @@ client.on('messageCreate', async (message) => {
       "{number} will strangle ur cock with her bussy tonight 😈",
       "{number} is ready for a 3some 😏"
     ];
-
     const num = hotNumbers[Math.floor(Math.random() * hotNumbers.length)];
     const msg = hotMessages[Math.floor(Math.random() * hotMessages.length)];
-
     message.channel.send(msg.replace("{number}", num));
     return;
   }
 
 });
+
 /* ---------------------------------------------------
    LOGIN
 --------------------------------------------------- */

@@ -71,20 +71,23 @@ function warnUser(userID) {
 }
 
 /* ---------------------------------------------------
-   WELCOME SYSTEM (FIXED + RESTORED)
+   WELCOME EVENT (FULLY FIXED)
 --------------------------------------------------- */
 client.on("guildMemberAdd", async (member) => {
-  const channel = member.guild.channels.cache.get(WELCOME_CHANNEL_ID);
-  if (!channel) return;
+  try {
+    const channel = member.guild.channels.cache.get(WELCOME_CHANNEL_ID);
+    if (!channel) return;
 
-  if (fs.existsSync(WELCOME_GIF)) {
+    let fileExists = fs.existsSync(WELCOME_GIF);
+
     await channel.send({
-      content: `Welcome <@${member.id}> 👑`,
-      files: [WELCOME_GIF],
+      content: `Welcome <@${member.id}>!! 👑`,
+      files: fileExists ? [WELCOME_GIF] : [],
       allowedMentions: { users: [member.id] }
     });
-  } else {
-    await channel.send(`Welcome <@${member.id}> 👑`);
+
+  } catch (err) {
+    console.error("❌ Welcome event error:", err);
   }
 });
 

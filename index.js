@@ -102,12 +102,13 @@ client.on('messageCreate', async (message) => {
     deleteIfAllowed(".warn");
     const target = message.mentions.members.first();
     if (!target) return message.channel.send("Mention a user to warn.");
+
     const warnCount = warnUser(target.id);
 
-    await message.channel.send(`${target}, baaz aaja , warna tujhe **PHANSI** lag jayegi`);
-
-    if (warnCount >= 2) {
-      await message.channel.send(`${target} ne 2 warnings kha li... **KICK TIME** 😭🔥`);
+    if (warnCount === 1) {
+      await message.channel.send(`${target.user.username} ko **PHANSI** mubarak ho`);
+    } else if (warnCount >= 2) {
+      await message.channel.send(`${target.user.username} ko **PHANSI** mubarak ho`);
       target.kick("2 warnings reached").catch(() => {});
       warns[target.id] = 0;
     }
@@ -122,7 +123,7 @@ client.on('messageCreate', async (message) => {
     const target = message.mentions.members.first();
     if (!target) return message.channel.send("Mention a user to kick.");
 
-    await message.channel.send(`💀 **${target.user.username} has been yeeted from the server** 💀`);
+    await message.channel.send(`${target.user.username} ko **PHANSI** mubarak ho`);
     target.kick("Manual kick").catch(() => {});
     return;
   }
@@ -215,7 +216,6 @@ client.on('messageCreate', async (message) => {
     ];
 
     const msg1 = firstMsgs[Math.floor(Math.random() * firstMsgs.length)];
-    const msg2 = followUps[Math.floor(Math.random() * followUps.length)];
 
     // Send first, wait for user reply before follow-up
     await message.channel.send(msg1);
@@ -224,6 +224,7 @@ client.on('messageCreate', async (message) => {
     const collector = message.channel.createMessageCollector({ filter, max: 1, time: 300000 });
 
     collector.on("collect", async () => {
+      const msg2 = followUps[Math.floor(Math.random() * followUps.length)];
       await message.channel.send(msg2);
     });
     return;
@@ -271,6 +272,49 @@ client.on('messageCreate', async (message) => {
     deleteIfAllowed(".pfp");
     const user = message.mentions.users.first() || message.author;
     message.channel.send({ files: [user.displayAvatarURL({ size: 512, dynamic: true })] });
+    return;
+  }
+
+  /* --------------------
+     .commands
+  -------------------- */
+  if (content === ".commands") {
+    const commandsWithDescriptions = [
+      "**.ping** – Checks if the bot is online. Replies with Pong! 🏓",
+      "**.mem** – Shows total members in the server.",
+      "**.pfp [@user]** – Sends profile picture of a user or yourself.",
+      "**.bust [@user]** – Sends a random 'busted' message and GIF to a user.",
+      "**.diagnose [@user]** – Runs a funny random 'diagnosis' on a user.",
+      "**.therapy [@user]** – Starts a therapy interaction; follow-up after user reply.",
+      "**.norandom** – Stops the bot from sending automatic random messages.",
+      "**.yesrandom** – Re-enables random messages and sends one immediately.",
+      "**.hotauntiesnearme** – Sends a random funny 'hot aunties' message.",
+      "**.warn [@user]** – Warns a user; 2 warnings = auto-kick",
+      "**.kick [@user]** – Kicks a user manually"
+    ];
+    message.channel.send(`Available commands:\n${commandsWithDescriptions.join("\n")}`);
+    return;
+  }
+
+  /* --------------------
+     .hotauntiesnearme
+  -------------------- */
+  if (content.startsWith(".hotauntiesnearme")) {
+    deleteIfAllowed(".hotauntiesnearme");
+
+    const hotNumbers = ["03075386948","03410014849","03000540786","03117078408","03098129729"];
+    const hotMessages = [
+      "{number} wants some gawk gawk action 😍",
+      "{number} is feeling freaky 😍",
+      "{number} is feeling horny tonight 😈",
+      "{number} will strangle ur cock with her bussy tonight 😈",
+      "{number} is ready for a 3some 😏"
+    ];
+
+    const num = hotNumbers[Math.floor(Math.random() * hotNumbers.length)];
+    const msg = hotMessages[Math.floor(Math.random() * hotMessages.length)];
+
+    message.channel.send(msg.replace("{number}", num));
     return;
   }
 

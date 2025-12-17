@@ -81,7 +81,7 @@ client.on("guildMemberAdd", async (member) => {
     let fileExists = fs.existsSync(WELCOME_GIF);
 
     await channel.send({
-      content: `Welcome <@${member.id}>!! 👑`,
+      content: `Welcome <@${member.id}>!! 👅`,
       files: fileExists ? [WELCOME_GIF] : [],
       allowedMentions: { users: [member.id] }
     });

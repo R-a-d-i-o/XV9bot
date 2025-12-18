@@ -50,7 +50,7 @@ function startRandomMessages(channel) {
     if (!randomEnabled) return;
     const msg = RANDOM_MESSAGES[Math.floor(Math.random() * RANDOM_MESSAGES.length)];
     channel.send(msg);
-  }, 2 * 60 * 60 * 1000);
+ }, 5 * 60 * 60 * 1000);
 }
 
 /* ---------------------------------------------------

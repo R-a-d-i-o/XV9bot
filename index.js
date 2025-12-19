@@ -79,7 +79,7 @@ client.on("guildMemberAdd", async (member) => {
     if (!channel) return;
 
     await channel.send({
-      content: `Welcome <@${member.id}>!! 👑`,
+      content: `Welcome <@${member.id}>!! , you are now a FREAK-ISTANI 👅 👅`,
       files: fs.existsSync(WELCOME_GIF) ? [WELCOME_GIF] : [],
       allowedMentions: { users: [member.id] }
     });
@@ -323,7 +323,7 @@ if (content.startsWith('.therapy')) {
     "{number} is feeling freaky 😍",
     "{number} is horny tonight 😈",
     "{number} will choke ur meat 😈",
-    "{number} ready for 3some 😏"
+    "{number} ready for freaky 3some 😏"
   ];
 
   const num = hotNumbers[Math.floor(Math.random() * hotNumbers.length)];

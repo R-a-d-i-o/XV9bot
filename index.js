@@ -21,7 +21,7 @@ const client = new Client({
 --------------------------------------------------- */
 const WELCOME_CHANNEL_ID = "858382440241561611";
 const RANDOM_CHANNEL = "858382440241561611";
-const WELCOME_GIF = './fraky.gif';
+const WELCOME_GIF = './welcome gif.gif';
 
 const BUST_SCENARIOS = [
   { message: "just got busted !!", gif: './captured.gif' },
@@ -50,7 +50,7 @@ function startRandomMessages(channel) {
     if (!randomEnabled) return;
     const msg = RANDOM_MESSAGES[Math.floor(Math.random() * RANDOM_MESSAGES.length)];
     channel.send(msg);
-  }, 5 * 60 * 60 * 1000);
+  }, 2 * 60 * 60 * 1000);
 }
 
 /* ---------------------------------------------------
@@ -63,7 +63,7 @@ app.listen(3000, () => console.log("Bot active"));
 /* ---------------------------------------------------
    WARN SYSTEM
 --------------------------------------------------- */
-const warns = {};
+const warns = {}; // { userID: count }
 function warnUser(userID) {
   if (!warns[userID]) warns[userID] = 0;
   warns[userID]++;
@@ -71,28 +71,31 @@ function warnUser(userID) {
 }
 
 /* ---------------------------------------------------
-   WELCOME EVENT
+   WELCOME EVENT (FULLY FIXED)
 --------------------------------------------------- */
 client.on("guildMemberAdd", async (member) => {
   try {
     const channel = member.guild.channels.cache.get(WELCOME_CHANNEL_ID);
     if (!channel) return;
 
+    let fileExists = fs.existsSync(WELCOME_GIF);
+
     await channel.send({
-      content: `Welcome <@${member.id}>!! 👅`,
-      files: fs.existsSync(WELCOME_GIF) ? [WELCOME_GIF] : [],
+      content: Welcome <@${member.id}>!! 👑,
+      files: fileExists ? [WELCOME_GIF] : [],
       allowedMentions: { users: [member.id] }
     });
+
   } catch (err) {
-    console.error("Welcome error:", err);
+    console.error("❌ Welcome event error:", err);
   }
 });
 
 /* ---------------------------------------------------
-   READY
+   BOT READY
 --------------------------------------------------- */
 client.on('ready', () => {
-  console.log(`Logged in as ${client.user.tag}`);
+  console.log(Logged in as ${client.user.tag});
   const channel = client.channels.cache.get(RANDOM_CHANNEL);
   if (channel) startRandomMessages(channel);
 });
@@ -107,16 +110,32 @@ client.on('messageCreate', async (message) => {
   const content = rawContent.toLowerCase();
   const channel = client.channels.cache.get(RANDOM_CHANNEL);
 
+  const noDelete = [
+    ".diagnose",
+    ".therapy",
+    ".norandom",
+    ".yesrandom",
+    ".ping",
+    ".commands",
+    ".hotauntiesnearme"
+  ];
+
+  function deleteIfAllowed(cmd) {
+    if (!noDelete.includes(cmd)) message.delete().catch(() => {});
+  }
+
   /* --------------------
-     .warn
+     .warn @user
   -------------------- */
   if (content.startsWith(".warn")) {
-    await message.delete().catch(() => {});
+    deleteIfAllowed(".warn");
+
     const target = message.mentions.members.first();
     if (!target) return message.channel.send("Mention a user to warn.");
 
     const count = warnUser(target.id);
-    await message.channel.send(`${target.user.username} ko **PHANSI** mubarak ho`);
+
+    await message.channel.send(${target.user.username} ko **PHANSI** mubarak ho);
 
     if (count >= 2) {
       target.kick("2 warnings reached").catch(() => {});
@@ -126,14 +145,15 @@ client.on('messageCreate', async (message) => {
   }
 
   /* --------------------
-     .kick
+     .kick @user
   -------------------- */
   if (content.startsWith(".kick")) {
-    await message.delete().catch(() => {});
+    deleteIfAllowed(".kick");
+
     const target = message.mentions.members.first();
     if (!target) return message.channel.send("Mention a user to kick.");
 
-    await message.channel.send(`${target.user.username} ko **PHANSI** mubarak ho`);
+    await message.channel.send(${target.user.username} ko **PHANSI** mubarak ho);
     target.kick("Manual kick").catch(() => {});
     return;
   }
@@ -142,15 +162,20 @@ client.on('messageCreate', async (message) => {
      .bust
   -------------------- */
   if (content.startsWith(".bust")) {
-    await message.delete().catch(() => {});
+    deleteIfAllowed(".bust");
+
     const user = message.mentions.users.first() || message.author;
     const scenario = BUST_SCENARIOS[Math.floor(Math.random() * BUST_SCENARIOS.length)];
 
-    await message.channel.send({
-      content: `<@${user.id}> ${scenario.message}`,
-      files: fs.existsSync(scenario.gif) ? [scenario.gif] : [],
-      allowedMentions: { users: [user.id] }
-    });
+    if (fs.existsSync(scenario.gif)) {
+      await message.channel.send({
+        content: <@${user.id}> ${scenario.message},
+        files: [scenario.gif],
+        allowedMentions: { users: [user.id] }
+      });
+    } else {
+      await message.channel.send(<@${user.id}> ${scenario.message});
+    }
     return;
   }
 
@@ -159,21 +184,33 @@ client.on('messageCreate', async (message) => {
   -------------------- */
   if (content.startsWith(".diagnose")) {
     const target = message.mentions.users.first() || message.author;
-    const running = [
-      `🖥️ Checking <@${target.id}>’s braincache…`,
-      `⚙️ Running diagnostics on <@${target.id}>…`,
-      `🔍 Scanning <@${target.id}> for brain activity…`,
-      `💀 Testing <@${target.id}>’s mental stability…`
-    ];
-    const conditions = [
-      "Condition: skill issue",
-      "Condition: Terminal Lobotomy",
-      "Condition: Horny Havoc Syndrome"
+
+    const runningMsgs = [
+      🖥️ Checking <@${target.id}>’s braincache…,
+      ⚙️ Running diagnostics on <@${target.id}>…,
+      🔍 Scanning <@${target.id}> for brain activity…,
+      💀 Testing <@${target.id}>’s mental stability…,
+      📡 Uploading <@${target.id}>’s stupidity levels…,
+      🫠 Calculating goofiness index…,
+      🧪 Performing cringe-level analysis…,
+      🕵️‍♂️ Tracking missing neurons…
     ];
 
-    await message.channel.send(running[Math.floor(Math.random() * running.length)]);
+    const finalConditions = [
+      "Condition: skill issue",
+      "Condition: Terminal Lobotomy",
+      "Condition: Bitch Syndrome",
+      "Condition: Severe Retard Syndrome",
+      "Condition: Horny Havoc Syndrome",
+      "Condition: Fapocalypse Syndrome"
+    ];
+
+    const running = runningMsgs[Math.floor(Math.random() * runningMsgs.length)];
+    const condition = finalConditions[Math.floor(Math.random() * finalConditions.length)];
+
+    await message.channel.send(running);
     setTimeout(() => {
-      message.channel.send(conditions[Math.floor(Math.random() * conditions.length)]);
+      message.channel.send(condition);
     }, 1500);
     return;
   }
@@ -183,7 +220,58 @@ client.on('messageCreate', async (message) => {
   -------------------- */
   if (content.startsWith(".therapy")) {
     const target = message.mentions.users.first() || message.author;
-    await message.channel.send(`🛋️ Sit down <@${target.id}>…`);
+
+    const firstMsgs = [
+      🛋️ Let's take it from the top, <@${target.id}>…,
+      🧐 Okay <@${target.id}>, what possessed you today?,
+      💻 Tell me what's going on in your brain.,
+      ☕ Alright <@${target.id}>, spill the tea.,
+      🧪 Brain audit time… explain yourself.
+    ];
+
+    const followUps = [
+      "😤 I don’t get paid enough for this shit",
+      "🫠 Your neuroses are flexing harder than your libido",
+      "🤖 Even ChatGPT gave up on you",
+      "💪 Bro faps harder than he tries in life",
+      "❤️ Spend more time with family <3",
+      "🥰 At least you tried",
+      "🧸 Chill… it's okay",
+      "🌱 Go touch grass",
+      "🌙 Suffering = growth",
+      "✨ You're doing better than you think",
+      "🔥 You've survived worse",
+      "❤️ You deserve peace",
+    ];
+
+    const msg1 = firstMsgs[Math.floor(Math.random() * firstMsgs.length)];
+    await message.channel.send(msg1);
+
+    const filter = m => m.author.id === target.id;
+    const collector = message.channel.createMessageCollector({ filter, max: 1, time: 300000 });
+
+    collector.on("collect", () => {
+      const msg2 = followUps[Math.floor(Math.random() * followUps.length)];
+      message.channel.send(msg2);
+    });
+
+    return;
+  }
+
+  /* --------------------
+     .yesrandom / .norandom
+  -------------------- */
+  if (content === ".yesrandom") {
+    randomEnabled = true;
+    message.channel.send("Random messages are now **ON**");
+    if (channel) startRandomMessages(channel);
+    return;
+  }
+
+  if (content === ".norandom") {
+    randomEnabled = false;
+    clearInterval(randomInterval);
+    message.channel.send("Random messages are now **OFF**");
     return;
   }
 
@@ -199,7 +287,7 @@ client.on('messageCreate', async (message) => {
      .mem
   -------------------- */
   if (content === ".mem") {
-    message.channel.send(`Total members: ${message.guild.memberCount}`);
+    message.channel.send(Total members: ${message.guild.memberCount});
     return;
   }
 
@@ -216,34 +304,28 @@ client.on('messageCreate', async (message) => {
      .commands
   -------------------- */
   if (content === ".commands") {
-    message.channel.send([
-      ".ping",
-      ".mem",
-      ".pfp [@user]",
-      ".bust [@user]",
-      ".diagnose [@user]",
-      ".therapy [@user]",
-      ".warn [@user]",
-      ".kick [@user]",
-      ".hotauntiesnearme"
-    ].join("\n"));
+    const commandsWithDescriptions = [
+      "**.ping** – Bot check",
+      "**.mem** – Server member count",
+      "**.pfp [@user]** – Sends profile picture",
+      "**.bust [@user]** – Busted GIF",
+      "**.diagnose [@user]** – Funny diagnosis",
+      "**.therapy [@user]** – Therapy session",
+      "**.norandom** – Turn OFF random messages",
+      "**.yesrandom** – Turn ON random messages",
+      "**.hotauntiesnearme** – Hot aunties joke",
+      "**.warn [@user]** – Warn system",
+      "**.kick [@user]** – Kick user"
+    ];
+    message.channel.send(Available commands:\n${commandsWithDescriptions.join("\n")});
     return;
   }
 
   /* --------------------
-     .hotauntiesnearme (FIXED)
+     .hotauntiesnearme
   -------------------- */
-  if (rawContent.startsWith(".hotauntiesnearme")) {
-    await message.delete();
-
-    const hotNumbers = [
-      "03075386948",
-      "03410014849",
-      "03000540786",
-      "03117078408",
-      "03098129729"
-    ];
-
+  if (content.startsWith(".hotauntiesnearme")) {
+    const hotNumbers = ["03075386948","03410014849","03000540786","03117078408","03098129729"];
     const hotMessages = [
       "{number} wants some gawk gawk 😍",
       "{number} is feeling freaky 😍",
@@ -251,13 +333,12 @@ client.on('messageCreate', async (message) => {
       "{number} will choke ur meat 😈",
       "{number} ready for 3some 😏"
     ];
-
     const num = hotNumbers[Math.floor(Math.random() * hotNumbers.length)];
     const msg = hotMessages[Math.floor(Math.random() * hotMessages.length)];
-
-    await message.channel.send(msg.replace("{number}", num));
+    message.channel.send(msg.replace("{number}", num));
     return;
   }
+
 });
 
 /* ---------------------------------------------------

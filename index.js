@@ -21,7 +21,7 @@ const client = new Client({
 --------------------------------------------------- */
 const WELCOME_CHANNEL_ID = "858382440241561611";
 const RANDOM_CHANNEL = "858382440241561611";
-const WELCOME_GIF = './fraky.gif';
+const WELCOME_GIF = './judge.gif';
 
 const BUST_SCENARIOS = [
   { message: "just got busted !!", gif: './captured.gif' },

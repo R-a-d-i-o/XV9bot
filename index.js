@@ -186,51 +186,62 @@ client.on('messageCreate', async (message) => {
   /* --------------------
      .therapy (FIXED)
   -------------------- */
-  if (content.startsWith('.therapy')) {
-    const target = message.mentions.users.first() || message.author;
+if (content.startsWith('.therapy')) {
+  const target = message.mentions.users.first() || message.author;
 
-    const firstMsgs = [
-      `🛋️ Let's take it from the top, <@${target.id}>…`,
-      `🧐 Okay <@${target.id}>, what possessed you today?`,
-      `💻 Tell me what's going on in your brain.`,
-      `☕ Alright <@${target.id}>, spill the tea.`,
-      `🧪 Brain audit time… explain yourself.`
-    ];
+  const firstMsgs = [
+    `🛋️ Let's take it from the top, <@${target.id}>…`,
+    `🧐 Okay <@${target.id}>, what possessed you today?`,
+    `💻 Tell me what's going on in your brain.`,
+    `☕ Alright <@${target.id}>, spill the tea.`,
+    `🧪 Brain audit time… explain yourself.`
+  ];
 
-    const followUps = [
-      "😤 I don’t get paid enough for this shit",
-      "🫠 Your neuroses are flexing harder than your libido",
-      "🤖 Even ChatGPT gave up on you",
-      "💪 Bro faps harder than he tries in life",
-      "❤️ Spend more time with family <3",
-      "🥰 At least you tried",
-      "🧸 Chill… it's okay",
-      "🌱 Go touch grass",
-      "🌙 Suffering = growth",
-      "✨ You're doing better than you think",
-      "🔥 You've survived worse",
-      "❤️ You deserve peace"
-    ];
+  const followUps = [
+    "😤 I don’t get paid enough for this shit",
+    "🫠 Your neuroses are flexing harder than your libido",
+    "🤖 Even ChatGPT gave up on you",
+    "💪 Bro faps harder than he tries in life",
+    "❤️ Spend more time with family <3",
+    "🥰 At least you tried",
+    "🧸 Chill… it's okay",
+    "🌱 Go touch grass",
+    "🌙 Suffering = growth",
+    "✨ You're doing better than you think",
+    "🔥 You've survived worse",
+    "❤️ You deserve peace"
+  ];
 
-    await message.channel.send(firstMsgs[Math.floor(Math.random() * firstMsgs.length)]);
+  await message.channel.send(
+    firstMsgs[Math.floor(Math.random() * firstMsgs.length)]
+  );
 
-    const filter = (m) => m.author.id === target.id && m.channel.id === message.channel.id;
-    const collector = message.channel.createMessageCollector({ filter, max: 1, time: 60_000 });
+  const filter = (m) =>
+    m.author.id === target.id &&
+    m.channel.id === message.channel.id;
 
-    collector.on('collect', async () => {
-      await message.channel.send(`<@${target.id}> ${followUps[Math.floor(Math.random() * followUps.length)]}`);
-    });
+  const collector = message.channel.createMessageCollector({
+    filter,
+    max: 1,
+    time: 60_000
+  });
 
-    collector.on('end', (collected) => {
-      if (collected.size === 0) {
-        message.channel.send(`🕰️ <@${target.id}> ran away from therapy.`);
-      }
-    });
-      }
-    });
+  collector.on('collect', async () => {
+    await message.channel.send(
+      `<@${target.id}> ${followUps[Math.floor(Math.random() * followUps.length)]}`
+    );
+  });
 
-    return;
-  }
+  collector.on('end', (collected) => {
+    if (collected.size === 0) {
+      message.channel.send(
+        `🕰️ <@${target.id}> ran away from therapy.`
+      );
+    }
+  });
+
+  return;
+}
 
   /* --------------------
      RANDOM TOGGLES

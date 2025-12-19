@@ -79,7 +79,7 @@ client.on("guildMemberAdd", async (member) => {
     if (!channel) return;
 
     await channel.send({
-      content: `Welcome <@${member.id}>!! , you are now a FREAK-ISTANI 👅 👅`,
+      content: `Welcome <@${member.id}>!! ⚖️🏛️👨‍⚖️ `,
       files: fs.existsSync(WELCOME_GIF) ? [WELCOME_GIF] : [],
       allowedMentions: { users: [member.id] }
     });

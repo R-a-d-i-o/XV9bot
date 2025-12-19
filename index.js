@@ -307,28 +307,31 @@ if (content.startsWith('.therapy')) {
   /* --------------------
      .hotauntiesnearme
   -------------------- */
-  if (content.startsWith('.hotauntiesnearme')) {
-    const hotNumbers = [
-      "03075386948",
-      "03410014849",
-      "03000540786",
-      "03117078408",
-      "03098129729"
-    ];
+ if (content.startsWith('.hotauntiesnearme')) {
+  await message.delete().catch(() => {}); // 👈 THIS LINE
 
-    const hotMessages = [
-      "{number} wants some gawk gawk 😍",
-      "{number} is feeling freaky 😍",
-      "{number} is horny tonight 😈",
-      "{number} will choke ur meat 😈",
-      "{number} ready for 3some 😏"
-    ];
+  const hotNumbers = [
+    "03075386948",
+    "03410014849",
+    "03000540786",
+    "03117078408",
+    "03098129729"
+  ];
 
-    const num = hotNumbers[Math.floor(Math.random() * hotNumbers.length)];
-    const msg = hotMessages[Math.floor(Math.random() * hotMessages.length)];
-    message.channel.send(msg.replace('{number}', num));
-    return;
-  }
+  const hotMessages = [
+    "{number} wants some gawk gawk 😍",
+    "{number} is feeling freaky 😍",
+    "{number} is horny tonight 😈",
+    "{number} will choke ur meat 😈",
+    "{number} ready for 3some 😏"
+  ];
+
+  const num = hotNumbers[Math.floor(Math.random() * hotNumbers.length)];
+  const msg = hotMessages[Math.floor(Math.random() * hotMessages.length)];
+
+  await message.channel.send(msg.replace("{number}", num));
+  return;
+}
 });
 
 /* ---------------------------------------------------
